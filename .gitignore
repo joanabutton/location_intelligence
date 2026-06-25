@@ -1,0 +1,15 @@
+# Raw and processed data (large, reproducible from source downloads)
+Data/
+
+# Local tool/editor state
+.claude/settings.local.json
+.vscode/
+.ipynb_checkpoints/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.pyc
