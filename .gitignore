@@ -1,5 +1,8 @@
 # Raw and processed data (large, reproducible from source downloads)
-Data/
+Data/*
+!Data/Processed/
+Data/Processed/*
+!Data/Processed/bgri_master.gpkg
 
 # Local tool/editor state
 .claude/settings.local.json
