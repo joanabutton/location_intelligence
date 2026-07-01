@@ -2,7 +2,7 @@
 
 A data-driven methodology for identifying optimal locations for an independent, family-oriented neighbourhood café in Porto, Portugal. Built as a portfolio case study demonstrating geospatial, statistical, and urban reasoning skills.
 
-**Status:** Ongoing portfolio project. Phases 1-2 are complete; later suitability-model phases are planned.
+**Status:** Ongoing portfolio project. Phases 1-2 are complete; Phase 3 public-realm data extraction and QGIS export is underway.
 
 ## Project Overview
 
@@ -31,7 +31,7 @@ location_intelligence/
 |-------|-------|--------|----------|
 | 1 | Residential Demand — population density, child density, family concentration | Complete | `Notebooks/01_explore_residential_demand.ipynb` |
 | 2 | Lifestyle & Purchasing Power — educational attainment, foreign nationals, private schools | Complete | `Notebooks/02_explore_lifestyle_purchasing_power.ipynb` |
-| 3 | Public Realm & Lingering Potential — parks, gardens, playgrounds | Planned | — |
+| 3 | Public Realm & Lingering Potential — parks, gardens, playgrounds, amenity buffers | In progress | `Notebooks/03_explore_public_realm_lingering_potential.ipynb` |
 | 4 | Neighbourhood Character — libraries, bookshops, cultural venues, independent retail | Planned | — |
 | 5 | Accessibility — public transport, metro, walkability, street network | Planned | — |
 | 6 | Tourism & Competition | Planned | — |
@@ -44,9 +44,11 @@ The concept-to-variable framework (how qualitative café requirements map to mea
 
 ## Key Outputs
 
-- **Master geospatial layer:** [`Data/Processed/bgri_master.gpkg`](Data/Processed/bgri_master.gpkg) — 1,659 Porto census subsections (BGRI 2021) enriched with all computed variables from completed phases
+- **Master geospatial layer:** [`Data/Processed/bgri_master.gpkg`](Data/Processed/bgri_master.gpkg) — 1,659 Porto census subsections (BGRI 2021) enriched with computed variables from completed census-based phases
 - **Interactive combined map:** [`Maps/combined_map.html`](Maps/combined_map.html) — multi-layer Folium map with population density, child density, family concentration, and private schools
 - **Private school map:** [`Maps/family_schools_map.html`](Maps/family_schools_map.html) — 50 family-relevant private schools in Porto
+- **Public-realm amenity GeoPackage:** [`Data/Processed/urban_amenities.gpkg`](Data/Processed/urban_amenities.gpkg) — QGIS-ready OpenStreetMap layers for Porto boundary, playgrounds, parks/gardens, small and large park subsets, and 400m/800m visual buffer layers
+- **OpenStreetMap amenity extracts:** [`Data/Processed/playgrounds_osm.gpkg`](Data/Processed/playgrounds_osm.gpkg) and [`Data/Processed/parks_osm.gpkg`](Data/Processed/parks_osm.gpkg) — source playground and park/garden features exported from Notebook 3
 - **Static figures:** `Maps/Figure 1 Relative Population Density...png` and `Maps/Figure 2 Relative Children Density...png`
 - **QGIS project:** [`QGIS/location_intelligence.qgz`](QGIS/location_intelligence.qgz) — loads `bgri_master.gpkg` for desktop GIS exploration
 
@@ -61,6 +63,7 @@ Raw data files are gitignored because they can be reproduced from public sources
 | Census 2021 results at subsection level | [INE](https://www.ine.pt) — Census 2021 | `Data/Raw/FS 2021 SubSecção Tot.xlsx` |
 | Census variable reference guide | [INE](https://www.ine.pt) | `Data/Raw/C2021_FSINTESE_VARIAVEIS.csv` |
 | School network (Rede Escolar) | Ministério da Educação / Porto Open Data | `Data/Raw/RedeEscolar_mapa_*.geojson` |
+| Parks, gardens, and playgrounds | [OpenStreetMap](https://www.openstreetmap.org) via OSMnx | Downloaded in Notebook 3 and exported to `Data/Processed/urban_amenities.gpkg` |
 
 The primary spatial unit throughout is the **BGRI subsection** (subsecção estatística) — the smallest Portuguese census geography, typically corresponding to a single urban block. Porto has 1,659 of them.
 
@@ -80,6 +83,7 @@ contextily
 mapclassify
 folium
 rasterio
+osmnx
 jupyter
 ```
 
