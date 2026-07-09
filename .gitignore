@@ -3,6 +3,9 @@ Data/*
 !Data/Processed/
 Data/Processed/*
 !Data/Processed/bgri_master.gpkg
+# Manually digitised park entrances (entrances_kept/review/excluded) are NOT reproducible
+# by code -- losing this file would lose that review work permanently, so it is tracked.
+!Data/Processed/park_entrances_draft.gpkg
 
 # Local tool/editor state
 .claude/settings.local.json

@@ -60,9 +60,8 @@ Are private schools clustered?
 Do they coincide with dense residential neighbourhoods?
 Do they identify different neighbourhoods than child density?
 
-### 2.3 Property Value Proxy
+### 2.3 Property Value Proxy - NOT DONE
 
-This may become more important than schools.
 
 Potential sources:
 
@@ -80,29 +79,39 @@ This directly connects to the concept-to-variable framework's purchasing-power r
 ## Phase 3
 Public Realm & Lingering Potential
 
-The café depends on people wanting to spend time somewhere.
+The café depends on people wanting to spend time somewhere. Implemented in `Notebooks/03_explore_public_realm_lingering_potential.ipynb`, organised into subsections §3.1–§3.4 to match the notebook directly (the original 3-topic split below has been folded into this single phase).
 
-3.1 Parks and Gardens
+### 3.1 Immediate family public realm (400m)
+
+Small parks and gardens, plus playgrounds as a supporting indicator.
 
 Questions:
 
 Which neighbourhoods have access to quality public space?
 Which areas support leisure-oriented pedestrian activity?
-
-3.2 Playgrounds
-
-Supporting indicator.
-
-
-Questions:
-
 Which dense residential areas also have family-oriented public space?
 
-## Phase 4
+### 3.2 Destination leisure area (400m)
 
-Neighbourhood Character
+Large parks and gardens.
 
-This comes directly from the project brief's emphasis on local identity and everyday life.
+Originally planned as a simple 400m buffer around each park. The notebook now anchors this on park entrances instead, with a 400m walking-distance network service area rather than a Euclidean buffer around the whole park polygon — see the data dictionary's "Park Entrances & Destination Leisure Area" section for the full rationale.
+
+### 3.3 Accessibility
+
+Public transport
+Metro stations
+Bus stops
+Walkability
+Street network
+Connectivity
+Pedestrian environment
+
+This directly supports the "easy local habit" concept.
+
+### 3.4 Cultural and intellectual amenities (600m)
+
+Neighbourhood character — comes directly from the project brief's emphasis on local identity and everyday life.
 
 Candidate datasets
 Libraries
@@ -115,23 +124,7 @@ Questions:
 
 Which areas feel like neighbourhood centres rather than dormitory districts?
 
-## Phase 5
-Accessibility
-Public transport
-Metro stations
-Bus stops
-Walkability
-Street network
-Connectivity
-Pedestrian environment
-
-This directly supports the "easy local habit" concept.
-
-## Phase 5 
-
-Tourism
-
-## Phase 6
+## Phase 4
 Competition & Risk
 
 Only after understanding demand.
@@ -164,11 +157,11 @@ This aligns with the brief's warning against tourist-oriented locations.
 
 # After finishing collecting data:
 
-## Phase 7. Data preparation for modelling
+## Phase 5. Data preparation for modelling
 
 This is the part many beginners skip, but it is where professional analysts spend huge amounts of time.
 
-### 7.1 Explore distributions
+### 5.1 Explore distributions
 
 For each variable:
 
@@ -195,7 +188,7 @@ might be:
 
 which is highly skewed.
 
-### 7.2 Correlation analysis
+### 5.2 Correlation analysis
 
 Create:
 
@@ -215,7 +208,7 @@ graduates	foreigners	0.76
 
 That suggests redundancy.
 
-### 7.3 Variable selection
+### 5.3 Variable selection
 
 Decide:
 
@@ -237,7 +230,7 @@ This stage is sometimes called:
 
 feature engineering and feature selection
 
-## Phase 8. Standardisation
+## Phase 6. Standardisation
 
 Variables have different units:
 
@@ -263,7 +256,8 @@ All variables become:
 
 0 → poor
 1 → excellent
-Phase 4. Build thematic indices
+
+### 6.1 Build thematic indices
 
 Instead of 15 independent variables, create themes.
 
@@ -284,7 +278,8 @@ walkability
 Daily Demand Index
 population density
 transit accessibility
-Phase 5. Weighting strategy
+
+### 6.2 Weighting strategy
 
 This is where your architecture background becomes surprisingly useful.
 
@@ -302,7 +297,7 @@ There is no objectively correct answer.
 
 Professional location intelligence models often use expert judgement.
 
-## Phase 9. Opportunity score calculation
+## Phase 7. Opportunity score calculation
 
 Calculate:
 
@@ -320,7 +315,8 @@ Result:
 Every BGRI receives:
 
 0 to 100
-Phase 7. Sensitivity analysis
+
+### 7.1 Sensitivity analysis
 
 This is an unusually sophisticated step for a portfolio project and recruiters love it.
 
@@ -344,7 +340,8 @@ Questions:
 
 Which areas consistently perform well?
 Which areas depend heavily on assumptions?
-Phase 8. Spatial visualisation
+
+### 7.2 Spatial visualisation
 
 Produce:
 
@@ -358,7 +355,8 @@ Possibly:
 Top 5%
 Top 10%
 Top 25%
-Phase 9. Ground truth validation
+
+### 7.3 Ground truth validation
 
 This is arguably the most important stage.
 
@@ -383,7 +381,7 @@ tourism distortion
 
 This discussion often becomes one of the strongest sections of a report.
 
-## Phase 10. Final recommendation
+## Phase 8. Final recommendation
 
 The project ultimately should answer:
 
