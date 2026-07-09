@@ -188,7 +188,11 @@ Processing notes:
 
 ## Park Entrances & Destination Leisure Area (§3.2)
 
-`large_parks_access_400m` (the destination-leisure indicator named in §3.2) is anchored on park **entrances**, not on a buffer around each park's whole polygon boundary — a boundary buffer overstates access by treating every metre of edge as equally reachable (including edges facing a river, a walled-off backyard, or a road with no crossing) and by measuring straight-line distance instead of the distance someone actually has to walk. See the rationale at the top of §3.2 in `Notebooks/03_explore_public_realm_lingering_potential.ipynb` for the full argument. Aggregation of this geometry into `bgri_master.gpkg` is still pending validation as of this writing — the layers below are the geometry prerequisite, not yet the accumulated indicator.
+`large_parks_access_400m` (the destination-leisure indicator named in §3.2) is anchored on park **entrances**, not on a buffer around each park's whole polygon boundary — a boundary buffer overstates access by treating every metre of edge as equally reachable (including edges facing a river, a walled-off backyard, or a road with no crossing) and by measuring straight-line distance instead of the distance someone actually has to walk. See the rationale at the top of §3.2 in `Notebooks/03_explore_public_realm_lingering_potential.ipynb` for the full argument.
+
+| Variable | Source | Description |
+| -------- | ------ | ----------- |
+| dist_large_park_entrance_m | Derived | Per-BGRI indicator: **network walking distance (m) to the nearest large-park entrance** — multi-source Dijkstra from all 133 entrances over the corrected §3.2.4 routing graph; each subsection reads the value at the reachable network node nearest its centroid. Continuous and threshold-free: any cutoff view (e.g. ≤400m) or decay transform is derivable later. Chosen over an entrance-count variant, which mostly measured how many gates a park had (a digitisation artifact) and was 68% zeros with a hard 400m cliff. Accumulated into `bgri_master.gpkg` (own_col of notebook 03, §3.2.7 — that notebook's first master contribution). Porto distribution: min 29m, median 823m, max 2,894m. |
 
 | Variable / Layer                      | Source | Description |
 | -------------------------------------- | ------ | ----------- |
