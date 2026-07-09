@@ -120,3 +120,53 @@ Processing notes:
 - Filtered to NATUREZAINSTITUCIONAL_DESC == "Particular" (private schools), then to family-relevant CICLO values (excludes Profissional/Artistico/Especial-only schools) to produce `family_schools`.
 - Exported to `../Data/processed/family_private_schools.geojson` (50 schools with geometry, sorted by NOME).
 - Known data quality issue: 3 schools have missing geometry (Colégio De Nossa Senhora Da Esperança, Jardim De Infância Do Viso – A.S.A.S., Jardim Escola João De Deus Porto). To be located and added manually in QGIS.
+
+
+# Public Realm and Lingering Potential
+
+| Variable / Layer              | Source           | Description |
+| ----------------------------- | ---------------- | ----------- |
+| playgrounds_osm               | OpenStreetMap via OSMnx | Playgrounds in Porto, downloaded using OSM tag `leisure=playground` |
+| parks_gardens_osm             | OpenStreetMap via OSMnx | Parks and gardens in Porto, downloaded using OSM tags `leisure=park` and `leisure=garden` |
+| small_parks_gardens           | Derived from OpenStreetMap | Parks/gardens with calculated area below 20,000 m2 |
+| large_parks_gardens           | Derived from OpenStreetMap | Parks/gardens with calculated area greater than or equal to 20,000 m2 |
+| playgrounds_400m_buffer       | Derived | 400m buffer around playground features, for QGIS inspection and future accessibility scoring |
+| small_parks_400m_buffer       | Derived | 400m buffer around small park/garden features, for immediate family public realm potential |
+| large_parks_400m_buffer       | Derived | 400m buffer around large park/garden features, for destination leisure area potential |
+| area_m2                       | Derived | Feature area in square metres, calculated after reprojecting OSM geometries to EPSG:3763 |
+| geometry_type                 | Derived | Geometry type retained for QGIS inspection |
+
+Source:
+OpenStreetMap
+
+Access method:
+OSMnx Python library, using `ox.geocode_to_gdf("Porto, Portugal")` to obtain the Porto boundary and `ox.features_from_polygon()` to download features inside that boundary.
+
+Notebook:
+`Notebooks/03_explore_public_realm_lingering_potential.ipynb`
+
+Exported files:
+- `../Data/Processed/playgrounds_osm.gpkg`
+- `../Data/Processed/parks_osm.gpkg`
+- `../Data/Processed/urban_amenities.gpkg`
+
+Layers in `urban_amenities.gpkg`:
+- `porto_boundary`
+- `playgrounds_osm`
+- `parks_gardens_osm`
+- `small_parks_gardens`
+- `large_parks_gardens`
+- `playgrounds_400m_buffer`
+- `small_parks_400m_buffer`
+- `large_parks_400m_buffer`
+
+Geographic Level:
+OpenStreetMap feature geometry clipped/downloaded within Porto municipality boundary.
+
+Coordinate Reference System:
+Downloaded from OpenStreetMap in WGS84, then reprojected to EPSG:3763 for metric area and buffer calculations.
+
+Processing notes:
+- OSM data was downloaded directly in Notebook 3 using OSMnx, not from a separate local source file.
+- The public realm variables are currently exploratory QGIS layers; final census-subsection accessibility indicators still need to be derived by spatial join/intersection with the BGRI geography.
+- Park/garden size classes use a 20,000 m2 threshold: `< 20000` for small parks/gardens and `>= 20000` for large parks/gardens.

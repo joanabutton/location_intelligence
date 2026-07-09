@@ -8,6 +8,7 @@ Data/Processed/*
 .claude/settings.local.json
 .vscode/
 .ipynb_checkpoints/
+Notebooks/cache/
 
 # OS junk
 .DS_Store
