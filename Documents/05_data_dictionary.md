@@ -221,3 +221,43 @@ Processing notes:
 - Validation of the network service area against both Euclidean baselines (visual map + numeric area comparison) lives in notebook 03 §3.2.6.
 - **The routing graph behind `entrances_400m_service_area_network` needs four corrections before it produces sensible reach** (full detail in notebook 03 §3.2.4): (1) walk-network edges lying entirely inside a `large_parks_gardens` polygon are excluded, so the 400m budget can't be absorbed looping around a park's own interior trails (found at Parque do Covelo); (2) entrances snap to the nearest node of that *filtered* graph, not the full one; (3) nodes within 15m are consolidated, bridging OSM's footpath-vs-street digitization gaps at what is really the same junction; (4) each entrance additionally connects, non-destructively, to both endpoints of every real street edge within 30m — some entrance connectors were never topologically joined to the street they sit beside (found at Covelo's Rua do Bolama entrance and five entrances sharing one street at Parque Oriental).
 - **Known residual limitations** (all 133 entrances audited): a few entrances legitimately can't reach some nearby-looking streets within 400m of walking — walled estates (Serralves), escarpments (Palácio de Cristal), river-valley detours (Parque Oriental / Rio Tinto), and one Av. da Boavista stub at Parque da Cidade with no pedestrian crossing mapped in OSM. These reflect real barriers or upstream OSM gaps, not routing errors.
+
+
+# Opportunity Score (MVP Synthesis)
+
+Synthesises the seven variables above (Phases 1, 2, and 3 §3.2) into thematic indices and a
+weighted opportunity score per BGRI subsection. Computed only for subsections with
+`N_INDIVIDUOS > 0` (1,609 of 1,659) — the 50 zero-population subsections (riverbanks, the port,
+motorway segments, Parque da Cidade itself) get `NaN` for every variable below rather than a
+misleading zero, since a location-suitability score has no meaning where there is no resident
+population.
+
+| Variable | Source | Description |
+| -------- | ------ | ----------- |
+| demand_index | Derived | Min-max scaled `pop_density` (0-1). |
+| family_index | Derived | Mean of min-max scaled `child_density`, `family_households_per_100_residents`, and `private_schools_access_400m` (0-1). |
+| urban_quality_index | Derived | Min-max scaled `dist_large_park_entrance_m`, inverted (`1 - scaled`) so that higher is better, matching the other indices. |
+| affluence_index | Derived | Mean of min-max scaled `pct_university` and `pct_foreign_nationals` (0-1). |
+| opportunity_score | Derived | `100 × (0.35×demand_index + 0.25×family_index + 0.25×urban_quality_index + 0.15×affluence_index)`. Baseline "everyday neighbourhood cafe" weighting. Porto distribution (scored sample, n=1,609): min 6.7, median 33.7, mean 33.5, max 66.4. |
+| opportunity_score_family_focused | Derived | Same formula, alternate weights (Demand 25%, Family 45%, Urban Quality 20%, Affluence 10%). Spearman rank correlation with `opportunity_score`: 0.966. |
+| opportunity_score_premium_focused | Derived | Same formula, alternate weights (Demand 25%, Family 15%, Urban Quality 20%, Affluence 40%). Spearman rank correlation with `opportunity_score`: 0.789. |
+
+Min-max scaling is fit on the scored (residential) sample only, so the excluded zero-population
+subsections can't distort the observed range.
+
+Source:
+Derived entirely from `bgri_master.gpkg` columns produced by Notebooks 01-03 — no new raw data.
+
+Notebook:
+`Notebooks/04_opportunity_score_and_recommendation.ipynb`
+
+Exported files:
+- `Data/Processed/04_bgri_opportunity_score.gpkg` — full scored sample (1,609 rows) with all intermediate scaled columns and indices.
+- `Maps/opportunity_score_map.html` — interactive Folium map, baseline/family-focused/premium-focused layers.
+
+Processing notes:
+- `own_cols` for this notebook: `demand_index`, `family_index`, `urban_quality_index`, `affluence_index`, `opportunity_score`, `opportunity_score_family_focused`, `opportunity_score_premium_focused`. Standard drop-then-merge accumulation into `bgri_master.gpkg`; the 50 excluded subsections are merged back in with these columns as `NaN` so the master's row count (1,659) is unaffected.
+- Correlation check (Pearson/Spearman) across the seven source variables before indexing found no pair redundant enough to drop outright; the strongest was `pop_density`/`child_density` at 0.81/0.84, which sit in different indices (Demand vs. Family) rather than the same one.
+- `pct_foreign_nationals` is flagged in the notebook as the weakest-justified input in Affluence — it could equally reflect tourism-adjacent turnover (a risk factor per the concept-to-variable framework) rather than "cosmopolitan but local." Revisit once Phase 4 tourism-intensity data exists.
+- Ground-truth validation against existing cafe locations (roadmap Phase 7.3) was explicitly not attempted — it requires the Phase 4 competition dataset, which doesn't exist yet, and approximating it from memory would not be a real validation.
+- Final recommendation clusters are described by coordinate and `DTMNFR21` code, not by parish name — the BGRI source carries no freguesia-name field, and no administrative-boundary join has been done yet (flagged as a v2 quick win in the notebook and in `Documents/04_roadmap.md`).
