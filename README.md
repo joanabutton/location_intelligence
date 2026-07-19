@@ -1,105 +1,118 @@
-# Location Intelligence — Retail Site Selection for Porto
+# Where should a family café open in Porto?
 
-A data-driven methodology for identifying optimal locations for an independent, family-oriented neighbourhood café in Porto, Portugal. Built as a portfolio case study demonstrating geospatial, statistical, and urban reasoning skills.
+**A location-intelligence model that scores all 1,659 Porto census subsections by how well they fit one specific café concept — and recommends where to start looking.**
 
-**Status:** Ongoing portfolio project. Phases 1-2 are complete; Phase 3 public-realm data extraction and QGIS export is underway.
+This is a portfolio case study in geospatial analysis, statistical reasoning, and turning a fuzzy business brief into a defensible, reproducible model. It does **not** predict revenue; it builds a transparent **location-suitability score** and is honest about what it can and cannot yet tell you.
 
-## Project Overview
+![Café opportunity score across Porto census subsections](Maps/opportunity_score_hero.png)
 
-**Business question:** Which locations in Porto offer the strongest opportunity for an independent family-friendly neighbourhood café?
+> 🗺️ **[Explore the interactive map →](https://joanabutton.github.io/location_intelligence/)** — pan, zoom, and switch between the baseline, family-focused, and premium-focused weightings.
 
-This project does not predict revenue. It builds a **location suitability model** that ranks areas by their fit with a specific café concept: specialty coffee, homemade pastries, a children's corner, a calm atmosphere, and a regular local clientele. The target customer is a local resident with moderate-to-high purchasing power — parents, freelancers, and culture-oriented locals who value familiarity and quality over speed or cost.
+---
 
-The full methodology is documented in [`Documents/01_project_brief.md`](Documents/01_project_brief.md).
+## The question
 
-## Repository Structure
+> *If I had €150,000 and wanted to open an independent, family-oriented neighbourhood café in Porto tomorrow, where should I start looking?*
+
+The concept is specific: specialty coffee, homemade pastries, a children's corner, a calm atmosphere, and a **regular local clientele** — not tourists. The target customer is a resident with moderate-to-high purchasing power: parents, freelancers, and culture-oriented locals who value familiarity and quality over speed or cost. Every variable in the model has to earn its place against *that* concept, not a generic "nice neighbourhood" ideal (see [`Documents/02_concept_to_variables.md`](Documents/02_concept_to_variables.md)).
+
+## The answer (first iteration)
+
+The model scores **1,609 residential subsections** from 0–100 (median 34, best 66). The top-decile candidates are spread across the city rather than clustered in one district:
+
+![Top-decile candidate areas](Maps/opportunity_score_top_decile.png)
+
+Two areas stand out as the strongest starting points, each for a different reason:
+
+| Candidate area | Why it scores | Best-fit positioning |
+|---|---|---|
+| **Western Porto, bordering the city's largest urban park** | Highest single score in the city (66/100) — strong on residential demand and park access, more modest on affluence | Leans on the *family / lingering* strength of the concept |
+| **Riverside districts closer to the Douro** | The only top-tier cluster with genuinely high purchasing-power signals | The clearer *"moderate premium"* candidate |
+
+A dense eastern cluster also scores well on demand and public-realm access, but its very low affluence signal makes it the riskiest fit for a premium price point. Full breakdown and per-subsection table in [`Notebooks/04_opportunity_score_and_recommendation.ipynb`](Notebooks/04_opportunity_score_and_recommendation.ipynb).
+
+*(Areas are described geographically and by census code; converting codes to formal parish names via an administrative-boundary join is a deliberate next step — see limitations below.)*
+
+## How the model works
+
+Seven census- and OpenStreetMap-derived indicators, each computed per subsection, standardised (min-max, 0–1) and combined into **four thematic indices**, then into a single weighted score:
 
 ```
-location_intelligence/
-├── Documents/          Project brief, analytical framework, data sources, roadmap, data dictionary, glossary
-├── Notebooks/          Jupyter notebooks — one per analytical phase
-├── Data/
-│   ├── Raw/            Source data (gitignored; see Data Sources below)
-│   └── Processed/      Enriched GeoPackages and GeoJSON outputs
-├── Maps/               Static PNG maps and interactive Folium HTML maps
-└── QGIS/               QGIS project file for desktop GIS work
+Opportunity score =  0.35 × Demand        (population density)
+                   +  0.25 × Family        (child density, family households, private-school access)
+                   +  0.25 × Urban Quality (walking distance to nearest large-park entrance)
+                   +  0.15 × Affluence      (university-degree %, foreign-national %)
 ```
 
-## Analytical Phases
+The weights are an explicit expert-judgement design decision, documented and defended rather than hidden — demand is the foundation (no residents, no regulars), family and lingering-quality define this concept against a generic café, and affluence is a viability floor rather than the driver.
+
+**Sensitivity analysis** tests how much that judgement matters. Re-running with a *family-focused* weighting barely moves the ranking (Spearman 0.97) — the baseline already leans that way. A *premium-focused* weighting moves it much more (Spearman 0.79; only 43% of the top decile survives), which is itself the finding: **the recommendation isn't just a proxy for "rich neighbourhoods"** — most of it rests on demand, family fit, and public-realm quality.
+
+One methodological highlight worth opening the notebooks for: the Urban Quality input is a **network walking-distance to park entrances** (routed over Porto's real pedestrian network, with manually ground-truthed entrance points), not a naïve straight-line buffer around park polygons — because a buffer credits access across rivers, walls, and uncrossable roads. See [`Notebooks/03`](Notebooks/03_explore_public_realm_lingering_potential.ipynb).
+
+## What this first iteration deliberately does *not* do
+
+Shipping a complete, honest thin model was chosen over a broad half-finished one. Known limitations, stated plainly:
+
+- **No competition or tourism data yet** — so the external-validity check ("do successful cafés already cluster in high-scoring areas?") was **not** performed rather than faked. This is the single most valuable next step.
+- **Urban Quality rests on one input** (park access) until walkability, transit, and cultural-amenity data are added.
+- **Affluence uses proxies** (education, foreign-national share) with no direct property-value or income data; the foreign-national proxy is explicitly flagged as ambiguous (cosmopolitan vs. tourism-adjacent).
+- **Candidate areas are described by coordinate and census code**, not verified parish names.
+
+Each is a scoped v2 task, not a vague gap — see the roadmap for the full sequence.
+
+---
+
+## Reproducibility & architecture
+
+Built entirely in Jupyter notebooks (no application code). Notebooks run in numeric order; each analytical phase reads source data, derives its own indicators, and accumulates them into a single canonical layer:
+
+- **`Data/Processed/bgri_master.gpkg`** — one row per BGRI subsection, the only data file tracked in git; everything else is reproducible from public sources.
+- Each notebook **owns** a declared set of columns and refreshes only those on re-run (drop-then-merge on the `BGRI2021` key), so any one phase can be re-run without rebuilding the whole pipeline or touching another notebook's outputs.
 
 | Phase | Topic | Status | Notebook |
 |-------|-------|--------|----------|
-| 1 | Residential Demand — population density, child density, family concentration | Complete | `Notebooks/01_explore_residential_demand.ipynb` |
-| 2 | Lifestyle & Purchasing Power — educational attainment, foreign nationals, private schools | Complete | `Notebooks/02_explore_lifestyle_purchasing_power.ipynb` |
-| 3 | Public Realm & Lingering Potential — parks, gardens, playgrounds, amenity buffers | In progress | `Notebooks/03_explore_public_realm_lingering_potential.ipynb` |
-| 4 | Neighbourhood Character — libraries, bookshops, cultural venues, independent retail | Planned | — |
-| 5 | Accessibility — public transport, metro, walkability, street network | Planned | — |
-| 6 | Tourism & Competition | Planned | — |
-| 7 | Data Preparation — distribution analysis, correlation analysis, variable selection | Planned | — |
-| 8 | Standardisation — min-max scaling | Planned | — |
-| 9 | Thematic Indices — Family, Affluence, Urban Quality, Daily Demand composites | Planned | — |
-| 10 | Opportunity Score — weighted combination, sensitivity analysis, spatial output, ground-truth validation | Planned | — |
+| 1 | Residential demand — population, child, family density | ✅ Complete | [`01`](Notebooks/01_explore_residential_demand.ipynb) |
+| 2 | Lifestyle & purchasing power — education, nationality, private schools | ✅ Complete *(property values → v2)* | [`02`](Notebooks/02_explore_lifestyle_purchasing_power.ipynb) |
+| 3 | Public realm — park-entrance network access (§3.2) | 🟡 Partial *(§3.1/3.3/3.4 → v2)* | [`03`](Notebooks/03_explore_public_realm_lingering_potential.ipynb) |
+| 4 | Competition & risk — cafés, tourism | ⬜ Deferred to v2 | — |
+| 5–8 | **Synthesis** — distributions, correlation, standardisation, indices, weighted score, sensitivity, maps, recommendation | ✅ Complete (MVP) | [`04`](Notebooks/04_opportunity_score_and_recommendation.ipynb) |
 
-The concept-to-variable framework (how qualitative café requirements map to measurable indicators) is in [`Documents/02_concept_to_variables.md`](Documents/02_concept_to_variables.md).
+### Environment
 
-## Key Outputs
+Conda environment `urban-intelligence-lab`. Core stack: `geopandas`, `pandas`, `numpy`, `scipy`, `scikit-learn`, `matplotlib`, `seaborn`, `contextily`, `mapclassify`, `folium`, `osmnx`, `jupyter`.
 
-- **Master geospatial layer:** [`Data/Processed/bgri_master.gpkg`](Data/Processed/bgri_master.gpkg) — 1,659 Porto census subsections (BGRI 2021) enriched with computed variables from completed census-based phases
-- **Interactive combined map:** [`Maps/combined_map.html`](Maps/combined_map.html) — multi-layer Folium map with population density, child density, family concentration, and private schools
-- **Private school map:** [`Maps/family_schools_map.html`](Maps/family_schools_map.html) — 50 family-relevant private schools in Porto
-- **Public-realm amenity GeoPackage:** [`Data/Processed/urban_amenities.gpkg`](Data/Processed/urban_amenities.gpkg) — QGIS-ready OpenStreetMap layers for Porto boundary, playgrounds, parks/gardens, small and large park subsets, and 400m/800m visual buffer layers
-- **OpenStreetMap amenity extracts:** [`Data/Processed/playgrounds_osm.gpkg`](Data/Processed/playgrounds_osm.gpkg) and [`Data/Processed/parks_osm.gpkg`](Data/Processed/parks_osm.gpkg) — source playground and park/garden features exported from Notebook 3
-- **Static figures:** `Maps/Figure 1 Relative Population Density...png` and `Maps/Figure 2 Relative Children Density...png`
-- **QGIS project:** [`QGIS/location_intelligence.qgz`](QGIS/location_intelligence.qgz) — loads `bgri_master.gpkg` for desktop GIS exploration
-
-## Data Sources
-
-Raw data files are gitignored because they can be reproduced from public sources. Only `bgri_master.gpkg` (the enriched output) is tracked.
-
-| Dataset | Source | File |
-|---------|--------|------|
-| BGRI 2021 census boundaries + demographics, Porto (code 1312) | [INE](https://www.ine.pt) — Census 2021 | `Data/Raw/BGRI2021_1312.gpkg` |
-| Census 2021 results at section level (education, nationality) | [INE](https://www.ine.pt) — Census 2021 | `Data/Raw/FS 2021 Secção Tot.xlsx` |
-| Census 2021 results at subsection level | [INE](https://www.ine.pt) — Census 2021 | `Data/Raw/FS 2021 SubSecção Tot.xlsx` |
-| Census variable reference guide | [INE](https://www.ine.pt) | `Data/Raw/C2021_FSINTESE_VARIAVEIS.csv` |
-| School network (Rede Escolar) | Ministério da Educação / Porto Open Data | `Data/Raw/RedeEscolar_mapa_*.geojson` |
-| Parks, gardens, and playgrounds | [OpenStreetMap](https://www.openstreetmap.org) via OSMnx | Downloaded in Notebook 3 and exported to `Data/Processed/urban_amenities.gpkg` |
-
-The primary spatial unit throughout is the **BGRI subsection** (subsecção estatística) — the smallest Portuguese census geography, typically corresponding to a single urban block. Porto has 1,659 of them.
-
-## Environment & Dependencies
-
-The project uses a conda environment named `urban-intelligence-lab`. There is no `requirements.txt` yet; the core libraries are:
-
-```
-geopandas>=1.1.3
-pandas
-numpy
-scipy
-scikit-learn
-matplotlib
-seaborn
-contextily
-mapclassify
-folium
-rasterio
-osmnx
-jupyter
+```bash
+conda activate urban-intelligence-lab
+cd Notebooks
+jupyter lab
 ```
 
-To reproduce the analysis, download the raw data files from the sources listed above, place them in `Data/Raw/`, and run the notebooks in order.
+To reproduce from scratch: download the raw data (sources below) into `Data/Raw/` and run the notebooks in order.
 
-## Project Documents
+### Data sources
+
+Raw inputs are gitignored (reproducible from public sources); only the enriched `bgri_master.gpkg` is tracked.
+
+| Dataset | Source |
+|---------|--------|
+| BGRI 2021 census boundaries + demographics, Porto (code 1312) | [INE](https://www.ine.pt) — Census 2021 |
+| Census 2021 results, section & subsection level (education, nationality) | [INE](https://www.ine.pt) — Census 2021 |
+| School network (Rede Escolar) | Ministério da Educação / Porto Open Data |
+| Parks, gardens, playgrounds, pedestrian network | [OpenStreetMap](https://www.openstreetmap.org) via OSMnx |
+
+The spatial unit throughout is the **BGRI subsection** (*subsecção estatística*) — Portugal's smallest census geography, roughly one urban block; Porto has 1,659. All analysis uses **EPSG:3763** (ETRS89 / Portugal TM06), reprojecting to Web Mercator only for interactive rendering.
+
+### Project documents
 
 | File | Purpose |
 |------|---------|
-| [`Documents/01_project_brief.md`](Documents/01_project_brief.md) | Concept definition, target customer, analytical objective, success criteria |
-| [`Documents/02_concept_to_variables.md`](Documents/02_concept_to_variables.md) | Maps qualitative café requirements to measurable indicators and proxy variables |
-| [`Documents/03_identifying_available_datasets.md`](Documents/03_identifying_available_datasets.md) | Available data sources for each indicator |
-| [`Documents/04_roadmap.md`](Documents/04_roadmap.md) | Phase-by-phase implementation plan |
-| [`Documents/05_data_dictionary.md`](Documents/05_data_dictionary.md) | Field definitions, sources, and computed variable formulas |
-| [`Documents/06_glossary.md`](Documents/06_glossary.md) | GIS and analytical terminology reference |
+| [`01_project_brief.md`](Documents/01_project_brief.md) | Concept, target customer, objective, success criteria |
+| [`02_concept_to_variables.md`](Documents/02_concept_to_variables.md) | Qualitative requirements → measurable indicators |
+| [`04_roadmap.md`](Documents/04_roadmap.md) | Phase-by-phase plan, and what was deferred and why |
+| [`05_data_dictionary.md`](Documents/05_data_dictionary.md) | Every field, its source, and its derivation formula |
+| [`06_glossary.md`](Documents/06_glossary.md) | GIS & analytical terminology |
 
-## Coordinate System
+### Other outputs
 
-All spatial data uses **EPSG:3763** (ETRS89 / Portugal TM06), the official Portuguese projected coordinate system. Interactive maps reproject to Web Mercator (EPSG:3857 / EPSG:4326) for Folium rendering.
+Interactive Folium maps (`Maps/*.html`), a QGIS project ([`QGIS/location_intelligence.qgz`](QGIS/location_intelligence.qgz)) pointed at the master layer, and per-phase GeoPackages under `Data/Processed/`.

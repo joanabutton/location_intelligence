@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where should a family café open in Porto? — Location Intelligence</title>
+<meta name="description" content="A geospatial location-suitability model scoring all 1,659 Porto census subsections for an independent family-oriented neighbourhood café.">
+<style>
+  :root {
+    --bg: #faf8f5;
+    --surface: #ffffff;
+    --ink: #23201d;
+    --muted: #6b635b;
+    --line: #e7e0d8;
+    --accent: #b5533c;
+    --accent-soft: #f3e6e0;
+    --shadow: 0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.06);
+    --maxw: 960px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #17150f;
+      --surface: #211e17;
+      --ink: #f0ece4;
+      --muted: #a89f93;
+      --line: #332e25;
+      --accent: #e08767;
+      --accent-soft: #33261f;
+      --shadow: 0 1px 3px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.4);
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 20px; }
+  header { padding: 56px 0 32px; }
+  .eyebrow {
+    text-transform: uppercase; letter-spacing: .12em; font-size: 12px;
+    font-weight: 700; color: var(--accent); margin: 0 0 14px;
+  }
+  h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.1; margin: 0 0 16px; letter-spacing: -0.02em; }
+  .lede { font-size: clamp(17px, 2.4vw, 20px); color: var(--muted); max-width: 42em; margin: 0; }
+  .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px; border-radius: 10px; font-weight: 600; font-size: 15px;
+    text-decoration: none; border: 1px solid transparent; transition: transform .08s ease, box-shadow .15s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn-primary { background: var(--accent); color: #fff; box-shadow: var(--shadow); }
+  .btn-ghost { background: var(--surface); color: var(--ink); border-color: var(--line); }
+  section { padding: 8px 0 24px; }
+  h2 { font-size: 22px; margin: 40px 0 10px; letter-spacing: -0.01em; }
+  p { margin: 0 0 16px; }
+  a { color: var(--accent); }
+  .map-card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+    overflow: hidden; box-shadow: var(--shadow); margin: 8px 0 8px;
+  }
+  .map-card iframe { display: block; width: 100%; height: 640px; border: 0; background: #eee; }
+  @media (max-width: 640px) { .map-card iframe { height: 460px; } }
+  .map-hint { font-size: 13.5px; color: var(--muted); padding: 12px 16px; border-top: 1px solid var(--line); margin: 0; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 10px 0; }
+  @media (max-width: 640px) { .grid { grid-template-columns: 1fr; } }
+  .tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+  .tile h3 { margin: 0 0 6px; font-size: 16px; }
+  .tile p { margin: 0; color: var(--muted); font-size: 14.5px; }
+  .formula {
+    background: var(--accent-soft); border: 1px solid var(--line); border-radius: 12px;
+    padding: 16px 18px; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13.5px; line-height: 1.7; overflow-x: auto; color: var(--ink); margin: 6px 0 18px;
+  }
+  ul.tight { margin: 0 0 16px; padding-left: 20px; }
+  ul.tight li { margin: 5px 0; color: var(--muted); }
+  ul.tight li strong { color: var(--ink); }
+  footer { border-top: 1px solid var(--line); margin-top: 40px; padding: 28px 0 56px; color: var(--muted); font-size: 14px; }
+  .pill { display: inline-block; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 2px 10px; font-size: 12.5px; font-weight: 600; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Geospatial Location Intelligence · Porto</p>
+    <h1>Where should a family café open in Porto?</h1>
+    <p class="lede">A transparent location-suitability model that scores all 1,659 Porto census
+      subsections by how well they fit one specific café concept — specialty coffee, a children's
+      corner, a calm room, and a regular <em>local</em> clientele — then recommends where to start looking.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#map">🗺️ Explore the interactive map</a>
+      <a class="btn btn-ghost" href="https://github.com/joanabutton/location_intelligence">View the code & method on GitHub →</a>
+    </div>
+  </header>
+
+  <section id="map">
+    <h2>The opportunity map</h2>
+    <p>Each shape is a census subsection, shaded by its opportunity score. Use the layer control
+      (top-right of the map) to switch between the <strong>baseline</strong>, <strong>family-focused</strong>,
+      and <strong>premium-focused</strong> weightings and see how the recommendation shifts.</p>
+    <div class="map-card">
+      <iframe src="opportunity_score_map.html" title="Interactive Porto café opportunity-score map" loading="lazy"></iframe>
+      <p class="map-hint">Darker = higher opportunity. Zero-population subsections (river, port, parks,
+        industrial land) are left unscored. Built with GeoPandas + Folium; base tiles © OpenStreetMap, © CARTO.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>How the score is built</h2>
+    <p>Seven census- and OpenStreetMap-derived indicators, standardised to 0–1 and combined into four
+      thematic indices, then a single weighted score from 0–100:</p>
+    <div class="formula">
+Opportunity score =  0.35 × Demand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(population density)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+  0.25 × Family&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(children, family households, school access)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+  0.25 × Urban Quality&nbsp;(walking distance to a large park)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;+  0.15 × Affluence&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(education %, foreign-national %)
+    </div>
+    <p>The weights are an explicit, documented expert-judgement decision — and a
+      <strong>sensitivity analysis</strong> shows how much they matter: a family-focused re-weighting
+      barely moves the ranking (rank correlation 0.97), while a premium-focused one moves it a lot
+      (0.79). That divergence is the finding — the recommendation is <em>not</em> just a proxy for
+      "wealthy areas."</p>
+  </section>
+
+  <section>
+    <h2>What it says — and what it doesn't</h2>
+    <div class="grid">
+      <div class="tile">
+        <h3>Two lead candidates</h3>
+        <p>Western Porto bordering the city's largest park (highest score, family/lingering strength),
+          and riverside districts (the clearer "moderate premium" fit).</p>
+      </div>
+      <div class="tile">
+        <h3>Honest about gaps <span class="pill">by design</span></h3>
+        <p>No competition or tourism data yet, so the "do good cafés already cluster here?" validation
+          was <em>not</em> faked — it's the top of the v2 list.</p>
+      </div>
+    </div>
+    <p>This is a deliberate first iteration: a complete, defensible thin model rather than a broad
+      half-finished one. Known limitations are stated plainly in the repository, each scoped as a
+      concrete next step.</p>
+    <ul class="tight">
+      <li><strong>Method highlight:</strong> park access is a real <em>network walking distance</em> to
+        manually verified park entrances — not a straight-line buffer that would credit access across
+        rivers and walls.</li>
+      <li><strong>Reproducible:</strong> every phase is an independently re-runnable notebook accumulating
+        into one canonical geospatial layer keyed on the census-subsection ID.</li>
+    </ul>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/joanabutton/location_intelligence">Read the full method on GitHub →</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap" style="padding:0;">
+      Portfolio case study · Porto, Portugal · INE Census 2021 (BGRI) + OpenStreetMap · EPSG:3763 ·
+      built with Python (GeoPandas, OSMnx, Folium) &amp; QGIS.
+      &nbsp;<a href="https://github.com/joanabutton/location_intelligence">Source repository</a>
+    </div>
+  </footer>
+</div>
+
+</body>
+</html>
