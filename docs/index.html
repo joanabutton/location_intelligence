@@ -104,8 +104,10 @@
       and <strong>premium-focused</strong> weightings and see how the recommendation shifts.</p>
     <div class="map-card">
       <iframe src="opportunity_score_map.html" title="Interactive Porto café opportunity-score map" loading="lazy"></iframe>
-      <p class="map-hint">Darker = higher opportunity. Zero-population subsections (river, port, parks,
-        industrial land) are left unscored. Built with GeoPandas + Folium; base tiles © OpenStreetMap, © CARTO.</p>
+      <p class="map-hint">Darker = higher opportunity. The red star pins mark the top-15 candidate
+        subsections — click one for its parish, score, and index breakdown. Zero-population subsections
+        (river, port, parks, industrial land) are left unscored. Built with GeoPandas + Folium; base
+        tiles © OpenStreetMap, © CARTO.</p>
     </div>
   </section>
 
@@ -131,8 +133,9 @@ Opportunity score =  0.35 × Demand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
     <div class="grid">
       <div class="tile">
         <h3>Two lead candidates</h3>
-        <p>Western Porto bordering the city's largest park (highest score, family/lingering strength),
-          and riverside districts (the clearer "moderate premium" fit).</p>
+        <p><strong>Aldoar</strong> in the west, beside the city's largest park (highest score,
+          family/lingering strength), and <strong>Cedofeita</strong> in central Porto (the clearer
+          "moderate premium" fit). Pinned on the map above.</p>
       </div>
       <div class="tile">
         <h3>Honest about gaps <span class="pill">by design</span></h3>
@@ -149,6 +152,9 @@ Opportunity score =  0.35 × Demand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nb
         rivers and walls.</li>
       <li><strong>Reproducible:</strong> every phase is an independently re-runnable notebook accumulating
         into one canonical geospatial layer keyed on the census-subsection ID.</li>
+      <li><strong>Explore it deeper:</strong> the repository ships a <strong>QGIS</strong> project pointed
+        at the full analytical layer — style any variable, filter candidate areas with expressions, and
+        overlay your own data.</li>
     </ul>
     <div class="cta-row">
       <a class="btn btn-primary" href="https://github.com/joanabutton/location_intelligence">Read the full method on GitHub →</a>

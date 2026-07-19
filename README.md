@@ -18,20 +18,20 @@ The concept is specific: specialty coffee, homemade pastries, a children's corne
 
 ## The answer (first iteration)
 
-The model scores **1,609 residential subsections** from 0–100 (median 34, best 66). The top-decile candidates are spread across the city rather than clustered in one district:
+The model scores **1,609 residential subsections** from 0–100 (median 34, best 66). The top-decile candidates spread across all seven of Porto's parishes — the [**interactive map**](https://joanabutton.github.io/location_intelligence/) pins the top 15 so you can click each one for its parish, score, and index breakdown:
 
 ![Top-decile candidate areas](Maps/opportunity_score_top_decile.png)
 
-Two areas stand out as the strongest starting points, each for a different reason:
+Reading the scores through their sub-indices, two areas stand out as the strongest starting points — each winning on a *different* half of what this concept needs:
 
 | Candidate area | Why it scores | Best-fit positioning |
 |---|---|---|
-| **Western Porto, bordering the city's largest urban park** | Highest single score in the city (66/100) — strong on residential demand and park access, more modest on affluence | Leans on the *family / lingering* strength of the concept |
-| **Riverside districts closer to the Douro** | The only top-tier cluster with genuinely high purchasing-power signals | The clearer *"moderate premium"* candidate |
+| **Aldoar** *(west, beside Parque da Cidade)* | Highest single score in the city (66/100) — strong residential demand and direct access to Porto's largest urban park; affluence only moderate | Leans on the *family / lingering* strength of the concept |
+| **Cedofeita** *(central Porto, historic-centre parish)* | The densest cluster of high–purchasing-power subsections in the top tier | The clearer *"moderate premium"* candidate |
 
-A dense eastern cluster also scores well on demand and public-realm access, but its very low affluence signal makes it the riskiest fit for a premium price point. Full breakdown and per-subsection table in [`Notebooks/04_opportunity_score_and_recommendation.ipynb`](Notebooks/04_opportunity_score_and_recommendation.ipynb).
+A high-affluence outlier worth noting sits in the **historic Ribeira riverfront** (same parish as Cedofeita) — but it's a single standout subsection, not a district. And **Campanhã** in the east contributes several high scores on demand and public-realm access, yet its near-zero affluence makes it the *riskiest* fit for a premium price point — a good reminder that the raw score must be read through the sub-indices, not taken flat. Full breakdown and per-subsection table in [`Notebooks/04_opportunity_score_and_recommendation.ipynb`](Notebooks/04_opportunity_score_and_recommendation.ipynb).
 
-*(Areas are described geographically and by census code; converting codes to formal parish names via an administrative-boundary join is a deliberate next step — see limitations below.)*
+*(Parish names were verified by reverse-geocoding each subsection's centroid against OpenStreetMap; a full join to official CAOP boundary polygons is the rigorous next step — see limitations below.)*
 
 ## How the model works
 
@@ -50,6 +50,13 @@ The weights are an explicit expert-judgement design decision, documented and def
 
 One methodological highlight worth opening the notebooks for: the Urban Quality input is a **network walking-distance to park entrances** (routed over Porto's real pedestrian network, with manually ground-truthed entrance points), not a naïve straight-line buffer around park polygons — because a buffer credits access across rivers, walls, and uncrossable roads. See [`Notebooks/03`](Notebooks/03_explore_public_realm_lingering_potential.ipynb).
 
+## Explore the results yourself
+
+Two ways to dig in, depending on how deep you want to go:
+
+- **In the browser — [interactive map](https://joanabutton.github.io/location_intelligence/).** Pan and zoom, toggle the baseline / family-focused / premium-focused weightings, and click the pinned top-15 candidate areas for their parish, score, and index breakdown. No install.
+- **In QGIS — the full analytical layer.** The project ships a QGIS project ([`QGIS/location_intelligence.qgz`](QGIS/location_intelligence.qgz)) already pointed at [`Data/Processed/bgri_master.gpkg`](Data/Processed/bgri_master.gpkg). Open it to explore every subsection and every variable directly — style the `opportunity_score` or any sub-index as a choropleth, filter with expressions (e.g. `affluence_index > 0.5 AND demand_index > 0.5`), inspect the attribute table, and overlay your own layers. This is the best surface for *your own* exploration: change classifications, query candidate areas, and sanity-check the model against local knowledge. The GeoPackage is EPSG:3763 and keyed on `BGRI2021`; the field-by-field meaning of every column is in [`Documents/05_data_dictionary.md`](Documents/05_data_dictionary.md).
+
 ## What this first iteration deliberately does *not* do
 
 Shipping a complete, honest thin model was chosen over a broad half-finished one. Known limitations, stated plainly:
@@ -57,7 +64,7 @@ Shipping a complete, honest thin model was chosen over a broad half-finished one
 - **No competition or tourism data yet** — so the external-validity check ("do successful cafés already cluster in high-scoring areas?") was **not** performed rather than faked. This is the single most valuable next step.
 - **Urban Quality rests on one input** (park access) until walkability, transit, and cultural-amenity data are added.
 - **Affluence uses proxies** (education, foreign-national share) with no direct property-value or income data; the foreign-national proxy is explicitly flagged as ambiguous (cosmopolitan vs. tourism-adjacent).
-- **Candidate areas are described by coordinate and census code**, not verified parish names.
+- **Parish names come from centroid reverse-geocoding**, not a full boundary-polygon join to official CAOP administrative units — good enough to name areas, not yet a definitive assignment.
 
 Each is a scoped v2 task, not a vague gap — see the roadmap for the full sequence.
 
